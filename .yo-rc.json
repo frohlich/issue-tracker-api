@@ -1,0 +1,30 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.frohlich.it"
+    },
+    "jhipsterVersion": "5.5.0",
+    "applicationType": "monolith",
+    "baseName": "IssueTracker",
+    "packageName": "com.frohlich.it",
+    "packageFolder": "com/frohlich/it",
+    "serverPort": "8080",
+    "authenticationType": "jwt",
+    "cacheProvider": "no",
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": "elasticsearch",
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "buildTool": "maven",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "ZDBiOGNjZjhkYzM4MWQ0ODQzNTgwMzlhOTM2NWQzYWVmZjk3ZDAwMDk0ZjQ3ZDM4MWIyMTM2YzZkZWI3OTNlMjBmNmYzMzViM2MzMzNkYzBhMGY3MGU1ZmUyNzhjZWQ5NTMxZjQ1MTFiYTI0ZDUxNWUzMTBlODJmYjAyZjEzYTI=",
+    "enableTranslation": false,
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "clientPackageManager": "npm",
+    "skipClient": true
+  }
+}
