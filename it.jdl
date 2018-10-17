@@ -1,0 +1,147 @@
+DEFAULT_MIN_LENGTH = 3
+DEFAULT_MAX_LENGTH = 50
+DEFAULT_TEXT_MAX_LENGTH = 2000
+
+entity Project {
+    title String maxlength(DEFAULT_MAX_LENGTH) minlength(DEFAULT_MIN_LENGTH) required
+    suspended Boolean
+
+    createdBy String
+	createdDate Instant
+    lastModifiedDate Instant
+    lastModifiedBy String
+}
+
+entity Issue {
+	title String maxlength(DEFAULT_MAX_LENGTH) minlength(DEFAULT_MIN_LENGTH) required
+    description String maxlength(DEFAULT_TEXT_MAX_LENGTH)
+    status Flow
+    type IssueType
+    priority Priority
+    duoDate Instant
+    closedAt Instant
+
+    createdBy String
+	createdDate Instant
+    lastModifiedDate Instant
+    lastModifiedBy String
+}
+
+entity IssueHistory {
+	flowStart Flow
+    flowEnd Flow
+
+    createdBy String
+	createdDate Instant
+    lastModifiedDate Instant
+    lastModifiedBy String
+}
+
+entity Commit {
+	hash String required
+
+    createdBy String
+	createdDate Instant
+    lastModifiedDate Instant
+    lastModifiedBy String
+}
+
+entity Attachment {
+	filename String
+    size Integer
+    hash String
+
+    createdBy String
+	createdDate Instant
+    lastModifiedDate Instant
+    lastModifiedBy String
+}
+
+entity Comment {
+	comment String maxlength(DEFAULT_TEXT_MAX_LENGTH) minlength(DEFAULT_MIN_LENGTH) required
+
+    createdBy String
+	createdDate Instant
+    lastModifiedDate Instant
+    lastModifiedBy String
+}
+
+/* Enums */
+enum Flow {
+	BACKLOG,
+    SPECIFICATION,
+    CODING,
+    TEST,
+    FINISHED
+}
+enum IssueType {
+	STORY, BUG, SPIKE
+}
+
+enum Priority {
+	CRITICAL, HIGH, MEDIUM, LOW
+}
+
+/* Relacionamentos */
+
+relationship OneToMany {
+	/* Um projeto tem várias issues */
+	Project{issues(title)} to Issue{project}
+}
+
+relationship ManyToOne {
+	/* Projeto iniciado por */
+	Project{ownedBy(login)} to User
+}
+
+relationship OneToMany {
+	/* Issue tem vários commits associados */
+	Issue{commits} to Commit
+    /* Issue pode ter vários comentários */
+	Issue{comments} to Comment
+    /* Issue pode ter um pai, uma associação */
+	Issue{parent} to Issue
+}
+
+relationship ManyToOne {
+	/* Issue encerrada por */
+	Issue{closedBy(login)} to User,
+    /* Issue designada para */
+    Issue{assignedTo(login)} to User,
+    /* Issue criada por */
+    Issue{reportedBy(login)} to User
+}
+
+relationship ManyToOne {
+	/* Um commit está associado a algum usuário do sistema */
+	Commit{ownedBy(login)} to User
+}
+
+relationship OneToMany {
+	/* Cada comentário pode ter vários anexos */
+	Comment{attachments} to Attachment
+}
+
+relationship ManyToMany {
+	/* Uma issue pode estar associada a mais de um histórico */
+	IssueHistory{issue} to Issue,
+    /* Um commentário pode estar associada a mais de um histórico */
+	IssueHistory{comment} to Comment
+
+}
+
+paginate Project with infinite-scroll
+paginate Issue with infinite-scroll
+paginate Commit with infinite-scroll
+paginate Comment with infinite-scroll
+paginate Attachment with infinite-scroll
+paginate IssueHistory with infinite-scroll
+
+// Use Data Transfert Objects (DTO)
+dto * with mapstruct
+
+// Set service options to all except few
+service all with serviceImpl
+
+// Set an angular suffix
+angularSuffix * with IssueTracker
