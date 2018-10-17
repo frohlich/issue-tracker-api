@@ -1,0 +1,57 @@
+{
+    "name": "IssueHistory",
+    "fields": [
+        {
+            "fieldName": "flowStart",
+            "fieldType": "Flow",
+            "fieldValues": "BACKLOG,SPECIFICATION,CODING,TEST,FINISHED"
+        },
+        {
+            "fieldName": "flowEnd",
+            "fieldType": "Flow",
+            "fieldValues": "BACKLOG,SPECIFICATION,CODING,TEST,FINISHED"
+        },
+        {
+            "fieldName": "createdBy",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "createdDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "lastModifiedDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "lastModifiedBy",
+            "fieldType": "String"
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "many-to-one",
+            "javadoc": "Uma issue pode estar associada a mais de um histórico",
+            "relationshipName": "issue",
+            "otherEntityName": "issue",
+            "otherEntityField": "id"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "javadoc": "Um commentário pode estar associada a mais de um histórico",
+            "relationshipName": "comment",
+            "otherEntityName": "comment",
+            "otherEntityField": "id"
+        }
+    ],
+    "changelogDate": "20181017135819",
+    "entityTableName": "issue_history",
+    "dto": "mapstruct",
+    "pagination": "infinite-scroll",
+    "service": "serviceImpl",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*",
+    "angularJSSuffix": "IssueTracker"
+}

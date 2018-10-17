@@ -1,0 +1,129 @@
+{
+    "name": "Issue",
+    "fields": [
+        {
+            "fieldName": "title",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength",
+                "minlength",
+                "required"
+            ],
+            "fieldValidateRulesMaxlength": 50,
+            "fieldValidateRulesMinlength": 3
+        },
+        {
+            "fieldName": "description",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 2000
+        },
+        {
+            "fieldName": "status",
+            "fieldType": "Flow",
+            "fieldValues": "BACKLOG,SPECIFICATION,CODING,TEST,FINISHED"
+        },
+        {
+            "fieldName": "type",
+            "fieldType": "IssueType",
+            "fieldValues": "STORY,BUG,SPIKE"
+        },
+        {
+            "fieldName": "priority",
+            "fieldType": "Priority",
+            "fieldValues": "CRITICAL,HIGH,MEDIUM,LOW"
+        },
+        {
+            "fieldName": "duoDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "closedAt",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "createdBy",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "createdDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "lastModifiedDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "lastModifiedBy",
+            "fieldType": "String"
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "one-to-many",
+            "javadoc": "Issue tem vários commits associados",
+            "relationshipName": "commits",
+            "otherEntityName": "commit",
+            "otherEntityRelationshipName": "issue"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "javadoc": "Issue pode ter vários comentários",
+            "relationshipName": "comments",
+            "otherEntityName": "comment",
+            "otherEntityRelationshipName": "issue"
+        },
+        {
+            "relationshipName": "issue",
+            "otherEntityName": "issue",
+            "relationshipType": "many-to-one",
+            "otherEntityField": "id"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "javadoc": "Issue pode ter um pai, uma associação",
+            "relationshipName": "parent",
+            "otherEntityName": "issue",
+            "otherEntityRelationshipName": "issue"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "javadoc": "Issue encerrada por",
+            "relationshipName": "closedBy",
+            "otherEntityName": "user",
+            "otherEntityField": "login"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "javadoc": "Issue designada para",
+            "relationshipName": "assignedTo",
+            "otherEntityName": "user",
+            "otherEntityField": "login"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "javadoc": "Issue criada por",
+            "relationshipName": "reportedBy",
+            "otherEntityName": "user",
+            "otherEntityField": "login"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "project",
+            "otherEntityName": "project",
+            "otherEntityField": "id"
+        }
+    ],
+    "changelogDate": "20181017135818",
+    "entityTableName": "issue",
+    "dto": "mapstruct",
+    "pagination": "infinite-scroll",
+    "service": "serviceImpl",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*",
+    "angularJSSuffix": "IssueTracker"
+}
