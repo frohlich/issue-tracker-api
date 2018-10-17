@@ -122,7 +122,7 @@ relationship OneToMany {
 	Comment{attachments} to Attachment
 }
 
-relationship ManyToMany {
+relationship ManyToOne {
 	/* Uma issue pode estar associada a mais de um histórico */
 	IssueHistory{issue} to Issue,
     /* Um commentário pode estar associada a mais de um histórico */
