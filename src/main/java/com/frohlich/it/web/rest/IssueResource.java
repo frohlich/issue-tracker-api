@@ -1,7 +1,10 @@
 package com.frohlich.it.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.frohlich.it.domain.enumeration.Flow;
 import com.frohlich.it.service.IssueService;
+import com.frohlich.it.service.dto.CommentDTO;
+import com.frohlich.it.service.impl.FileStorageService;
 import com.frohlich.it.web.rest.errors.BadRequestAlertException;
 import com.frohlich.it.web.rest.util.HeaderUtil;
 import com.frohlich.it.web.rest.util.PaginationUtil;
@@ -15,13 +18,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
@@ -38,9 +45,12 @@ public class IssueResource {
     private static final String ENTITY_NAME = "issue";
 
     private IssueService issueService;
+    private FileStorageService fileStorageService;
 
-    public IssueResource(IssueService issueService) {
+    public IssueResource(IssueService issueService, FileStorageService fileStorageService) {
+
         this.issueService = issueService;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -144,5 +154,85 @@ public class IssueResource {
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/issues");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
+
+    private UploadFileResponse uploadFile(MultipartFile file) {
+        String fileName = fileStorageService.storeFile(file);
+
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path("/downloadFile/")
+            .path(fileName)
+            .toUriString();
+
+        return new UploadFileResponse(fileName, fileDownloadUri,
+            file.getContentType(), file.getSize());
+    }
+
+    @PostMapping("/issues/{issueId}/flow/{flowId}")
+    public List<UploadFileResponse> flow(
+        @PathVariable Long issueId,
+        @PathVariable Long flowId,
+        @RequestParam("files") MultipartFile[] files,
+        @RequestParam("comment") String comment) {
+
+        log.debug(" UPLOAD :" + comment);
+        log.debug(" FLOW ID:" + flowId.toString());
+        log.debug(" ISSUE ID:" + issueId.toString());
+        log.debug(" Attachments number:" + String.valueOf(files.length));
+
+        if (issueId.equals(null) || flowId.equals(null)) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+
+        if (!Flow.contains(flowId.toString())) {
+            throw new BadRequestAlertException("Invalid flow", ENTITY_NAME, "idnull");
+        }
+
+        CommentDTO dto = new CommentDTO();
+        dto.setComment(comment);
+        dto.setIssueId(issueId);
+
+        this.issueService.flowTo(issueId, Flow.FINISHED, dto);
+
+        return Arrays.asList(files)
+            .stream()
+            .map(file -> uploadFile(file))
+            .collect(Collectors.toList());
+    }
+	
+    /**
+     * POST /issues/:id/flowtesttofinished
+     *
+     * @param idIssue    the id of the entity
+     * @param commentDTO new comment
+     */
+
+    @PostMapping("/issues/{idIssue}/flowtesttofinished")
+    public void flowTestToFinished(@PathVariable Long idIssue, @Valid @RequestBody CommentDTO commentDTO) {
+        final Optional<IssueDTO> issue = this.issueService.findOne(idIssue);
+
+        if (!issue.isPresent()) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+
+        this.issueService.flowTo(idIssue, Flow.FINISHED, commentDTO);
+    }
+
+    /**
+     * POST /issues/:id/changeowner/:idUser
+     *
+     * @param idIssue the id the entity.
+     * @param idUser  the id of new user.
+     */
+    @PostMapping("/issues/:id/changeowner/:idUser")
+    public void changeOwner(@PathVariable Long idIssue, @PathVariable Long idUser) {
+
+        if (idIssue.equals(null) || idUser.equals(null)) {
+            throw new UnsupportedOperationException("Id is required.");
+        }
+
+        this.issueService.changeOwner(idIssue, idUser);
+    }
+
+
 
 }

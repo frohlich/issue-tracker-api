@@ -64,28 +64,6 @@ public class CommitResource {
     }
 
     /**
-     * PUT  /commits : Updates an existing commit.
-     *
-     * @param commitDTO the commitDTO to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated commitDTO,
-     * or with status 400 (Bad Request) if the commitDTO is not valid,
-     * or with status 500 (Internal Server Error) if the commitDTO couldn't be updated
-     * @throws URISyntaxException if the Location URI syntax is incorrect
-     */
-    @PutMapping("/commits")
-    @Timed
-    public ResponseEntity<CommitDTO> updateCommit(@Valid @RequestBody CommitDTO commitDTO) throws URISyntaxException {
-        log.debug("REST request to update Commit : {}", commitDTO);
-        if (commitDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        CommitDTO result = commitService.save(commitDTO);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, commitDTO.getId().toString()))
-            .body(result);
-    }
-
-    /**
      * GET  /commits : get all the commits.
      *
      * @param pageable the pagination information

@@ -1,11 +1,19 @@
 package com.frohlich.it.service.impl;
 
+import com.frohlich.it.domain.User;
+import com.frohlich.it.domain.enumeration.Flow;
+import com.frohlich.it.domain.enumeration.IssueType;
+import com.frohlich.it.domain.enumeration.Priority;
+import com.frohlich.it.service.CommentService;
 import com.frohlich.it.service.IssueService;
 import com.frohlich.it.domain.Issue;
 import com.frohlich.it.repository.IssueRepository;
 import com.frohlich.it.repository.search.IssueSearchRepository;
+import com.frohlich.it.service.UserService;
+import com.frohlich.it.service.dto.CommentDTO;
 import com.frohlich.it.service.dto.IssueDTO;
 import com.frohlich.it.service.mapper.IssueMapper;
+import com.frohlich.it.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
@@ -33,10 +42,18 @@ public class IssueServiceImpl implements IssueService {
 
     private IssueSearchRepository issueSearchRepository;
 
-    public IssueServiceImpl(IssueRepository issueRepository, IssueMapper issueMapper, IssueSearchRepository issueSearchRepository) {
+    private UserService userService;
+
+    private CommentService commentService;
+
+    public IssueServiceImpl(IssueRepository issueRepository, IssueMapper issueMapper,
+                            IssueSearchRepository issueSearchRepository, UserService userService,
+                            CommentService commentService) {
         this.issueRepository = issueRepository;
         this.issueMapper = issueMapper;
         this.issueSearchRepository = issueSearchRepository;
+        this.userService = userService;
+        this.commentService = commentService;
     }
 
     /**
@@ -110,5 +127,119 @@ public class IssueServiceImpl implements IssueService {
         log.debug("Request to search for a page of Issues for query {}", query);
         return issueSearchRepository.search(queryStringQuery(query), pageable)
             .map(issueMapper::toDto);
+    }
+
+    /**
+     * Advance Flow.BACKLOG to Flow.SPECIFICATION.
+     *
+     * @param idIssue the id of the entity.
+     * @param commentDTO new comment.
+     */
+    @Transactional
+    public void flowTo (Long idIssue, Flow flow, CommentDTO commentDTO) {
+        final Optional<Issue> issue = issueRepository.findById(idIssue);
+
+        if (!issue.isPresent()) {
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "");
+        }
+
+        issue.get().setStatus(flow);
+
+        // TODO: Send Mail;
+
+        this.commentService.save(commentDTO);
+
+        this.issueRepository.save(issue.get());
+    }
+
+    @Transactional @Override
+    public void changeOwner(Long idIssue, Long idNewUser) {
+        final Optional<Issue> issue = issueRepository.findById(idIssue);
+
+        if (!issue.isPresent()) {
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "");
+        }
+
+        final Optional<User> user = userService.getUserWithAuthorities(idNewUser);
+
+        if (!user.isPresent()) {
+            throw new BadRequestAlertException("User is invalid", Issue.class.getName(), "");
+        }
+
+        issue.get().setAssignedTo(user.get());
+
+        this.issueRepository.save(issue.get());
+
+    }
+
+    @Transactional @Override
+    public void changeReporter(Long idIssue, Long idNewUser) {
+        final Optional<Issue> issue = issueRepository.findById(idIssue);
+
+        if (!issue.isPresent()) {
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "");
+        }
+
+        final Optional<User> user = userService.getUserWithAuthorities(idNewUser);
+
+        if (!user.isPresent()) {
+            throw new BadRequestAlertException("User is invalid", Issue.class.getName(), "");
+        }
+
+        issue.get().setReportedBy(user.get());
+
+        this.issueRepository.save(issue.get());
+    }
+
+    @Transactional @Override
+    public void changePriority(Long idIssue, String newPriority) {
+        final Optional<Issue> issue = issueRepository.findById(idIssue);
+
+        if (!issue.isPresent()) {
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "");
+        }
+
+        if (!Priority.contains(newPriority)) {
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "");
+        }
+
+        issue.get().setPriority(Priority.valueOf(newPriority));
+
+        this.issueRepository.save(issue.get());
+    }
+
+    @Override
+    public void changeType(Long idIssue, String newType) {
+        final Optional<Issue> issue = issueRepository.findById(idIssue);
+
+        if (!issue.isPresent()) {
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "");
+        }
+
+        if (!IssueType.contains(newType)) {
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "");
+        }
+
+        issue.get().setType(IssueType.valueOf(newType));
+
+        this.issueRepository.save(issue.get());
+    }
+
+    @Override @Transactional
+    public void cancel(Long idIssue, CommentDTO commentDTO) {
+        final Optional<Issue> issue = issueRepository.findById(idIssue);
+        final Optional<User> user = userService.getUserWithAuthorities();
+
+        if (!issue.isPresent()) {
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "");
+        }
+
+        this.commentService.save(commentDTO);
+
+        issue.get().setClosedBy(user.get());
+        issue.get().setClosedAt(Instant.now());
+        issue.get().setStatus(Flow.CANCELED);
+
+        this.issueRepository.save(issue.get());
     }
 }

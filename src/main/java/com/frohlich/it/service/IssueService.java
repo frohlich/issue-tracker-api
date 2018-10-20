@@ -1,5 +1,7 @@
 package com.frohlich.it.service;
 
+import com.frohlich.it.domain.enumeration.Flow;
+import com.frohlich.it.service.dto.CommentDTO;
 import com.frohlich.it.service.dto.IssueDTO;
 
 import org.springframework.data.domain.Page;
@@ -53,4 +55,16 @@ public interface IssueService {
      * @return the list of entities
      */
     Page<IssueDTO> search(String query, Pageable pageable);
+
+    void flowTo(Long idIssue, Flow flow, CommentDTO commentDTO);
+
+    void changeOwner(Long idIssue, Long idNewUser);
+
+    void changeReporter(Long idIssue, Long idNewUser);
+
+    void changePriority(Long idIssue, String newPriority);
+
+    void changeType(Long idIssue, String newType);
+
+    void cancel(Long idIssue, CommentDTO commentDTO);
 }

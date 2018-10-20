@@ -2,6 +2,9 @@ package com.frohlich.it.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.frohlich.it.domain.enumeration.Flow;
+import com.frohlich.it.domain.enumeration.IssueType;
+import com.frohlich.it.domain.enumeration.Priority;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
@@ -14,19 +17,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
 
-import com.frohlich.it.domain.enumeration.Flow;
-
-import com.frohlich.it.domain.enumeration.IssueType;
-
-import com.frohlich.it.domain.enumeration.Priority;
-
 /**
  * A Issue.
  */
 @Entity
 @Table(name = "issue")
 @Document(indexName = "issue")
-public class Issue implements Serializable {
+public class Issue extends AbstractAuditingEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -61,18 +58,6 @@ public class Issue implements Serializable {
 
     @Column(name = "closed_at")
     private Instant closedAt;
-
-    @Column(name = "created_by")
-    private String createdBy;
-
-    @Column(name = "created_date")
-    private Instant createdDate;
-
-    @Column(name = "last_modified_date")
-    private Instant lastModifiedDate;
-
-    @Column(name = "last_modified_by")
-    private String lastModifiedBy;
 
     /**
      * Issue tem vários commits associados
@@ -222,58 +207,6 @@ public class Issue implements Serializable {
 
     public void setClosedAt(Instant closedAt) {
         this.closedAt = closedAt;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public Issue createdBy(String createdBy) {
-        this.createdBy = createdBy;
-        return this;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Instant getCreatedDate() {
-        return createdDate;
-    }
-
-    public Issue createdDate(Instant createdDate) {
-        this.createdDate = createdDate;
-        return this;
-    }
-
-    public void setCreatedDate(Instant createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Instant getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public Issue lastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-        return this;
-    }
-
-    public void setLastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
-
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public Issue lastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-        return this;
-    }
-
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
     }
 
     public Set<Commit> getCommits() {
