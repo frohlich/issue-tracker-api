@@ -135,4 +135,4 @@ application:
     file:
         upload-dir: ./uploads
     repository:
-        repo-dir: ./tmp
+        repo-dir: ./repos
