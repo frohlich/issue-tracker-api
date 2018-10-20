@@ -66,6 +66,7 @@
         <scala-maven-plugin.version>3.4.2</scala-maven-plugin.version>
         <sonar-maven-plugin.version>3.5.0.1254</sonar-maven-plugin.version>
         <git-commit-id-plugin.version>2.2.5</git-commit-id-plugin.version>
+	<jgit.version>4.11.0.201803080745-r</jgit.version>
 
         <!-- Sonar properties -->
         <sonar.host.url>http://localhost:9001</sonar.host.url>
@@ -361,6 +362,17 @@
             <artifactId>spring-security-data</artifactId>
         </dependency>
         <!-- jhipster-needle-maven-add-dependency -->
+        <!-- JGIT SERVER -->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit.http.server</artifactId>
+            <version>${jgit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>${jgit.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -372,17 +384,17 @@
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <annotationProcessorPaths>
-                        <repoDir>
+                        <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
                             <version>${mapstruct.version}</version>
-                        </repoDir>
+                        </path>
                         <!-- For JPA static metamodel generation -->
-                        <repoDir>
+                        <path>
                             <groupId>org.hibernate</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
                             <version>${hibernate.version}</version>
-                        </repoDir>
+                        </path>
 
                     </annotationProcessorPaths>
                 </configuration>
@@ -495,7 +507,7 @@
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
-                            <!-- Sets the repoDir to the file which contains the execution data. -->
+                            <!-- Sets the path to the file which contains the execution data. -->
                             <destFile>${project.testresult.directory}/coverage/jacoco/jacoco.exec</destFile>
                         </configuration>
                     </execution>

@@ -1,11 +1,15 @@
 package com.frohlich.it.service.impl;
 
+import com.frohlich.it.domain.User;
 import com.frohlich.it.service.ProjectService;
 import com.frohlich.it.domain.Project;
 import com.frohlich.it.repository.ProjectRepository;
 import com.frohlich.it.repository.search.ProjectSearchRepository;
+import com.frohlich.it.service.RepositoryService;
+import com.frohlich.it.service.UserService;
 import com.frohlich.it.service.dto.ProjectDTO;
 import com.frohlich.it.service.mapper.ProjectMapper;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
@@ -29,14 +34,22 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
 
+    private final UserService userService;
+
+    private final RepositoryService repositoryService;
+
     private final ProjectMapper projectMapper;
 
     private final ProjectSearchRepository projectSearchRepository;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository, ProjectMapper projectMapper, ProjectSearchRepository projectSearchRepository) {
+    public ProjectServiceImpl(ProjectRepository projectRepository, ProjectMapper projectMapper,
+                              ProjectSearchRepository projectSearchRepository, UserService userService,
+                              RepositoryService repositoryService) {
         this.projectRepository = projectRepository;
         this.projectMapper = projectMapper;
         this.projectSearchRepository = projectSearchRepository;
+        this.userService = userService;
+        this.repositoryService = repositoryService;
     }
 
     /**
@@ -50,10 +63,23 @@ public class ProjectServiceImpl implements ProjectService {
         log.debug("Request to save Project : {}", projectDTO);
 
         Project project = projectMapper.toEntity(projectDTO);
+
+        final Optional<User> isUser = userService.getUserWithAuthorities();
+
+        project.setOwnedBy(isUser.get());
         project = projectRepository.save(project);
-        ProjectDTO result = projectMapper.toDto(project);
-        projectSearchRepository.save(project);
-        return result;
+
+        try {
+            repositoryService.createWithFirstCommit(projectDTO);
+        } catch (IOException e) {
+            throw new UnsupportedOperationException();
+            // TODO: Trocar IOException
+        } catch (GitAPIException e) {
+            throw new UnsupportedOperationException();
+            // TODO: Trocar GitAPIException
+        }
+
+        return projectMapper.toDto(project);
     }
 
     /**
