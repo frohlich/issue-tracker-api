@@ -1,4 +1,4 @@
-package com.frohlich.it.config;
+package com.frohlich.it.config.jgit;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,11 +13,11 @@ import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 
-public class CustomRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
+public class ITRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
 
     private String path;
 
-    public CustomRepositoryResolver (String path) {
+    public ITRepositoryResolver (String path) {
             this.path = path;
     }
 

@@ -1,17 +1,16 @@
 package com.frohlich.it.config;
 
-import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jgit.http.server.GitServlet;
-import org.eclipse.jgit.transport.UploadPack;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
-import org.eclipse.jgit.transport.resolver.UploadPackFactory;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
+import com.frohlich.it.config.jgit.ITReceivePackFilter;
+import com.frohlich.it.config.jgit.ITRepositoryResolver;
+import com.frohlich.it.config.jgit.ITUploadPackFilter;
 
 @Configuration
 public class JGitServletConfiguration {
@@ -28,10 +27,12 @@ public class JGitServletConfiguration {
 
         GitServlet gs = new GitServlet();
 
-        RepositoryResolver<HttpServletRequest> repoResolver = new CustomRepositoryResolver(this.applicationProperties.getRepository().getRepoDir());
+        RepositoryResolver<HttpServletRequest> repoResolver = 
+        		new ITRepositoryResolver(this.applicationProperties.getRepository().getRepoDir());
         gs.setRepositoryResolver(repoResolver);
 
-        gs.addUploadPackFilter(new AuthFilter());
+        gs.addUploadPackFilter(new ITUploadPackFilter());
+        gs.addReceivePackFilter(new ITReceivePackFilter());
 
 
         registration.addUrlMappings("/git/*");
