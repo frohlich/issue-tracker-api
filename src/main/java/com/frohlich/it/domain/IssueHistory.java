@@ -1,16 +1,26 @@
 package com.frohlich.it.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModelProperty;
-
-import javax.persistence.*;
-
-import org.springframework.data.elasticsearch.annotations.Document;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+import org.springframework.data.elasticsearch.annotations.Document;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.frohlich.it.domain.enumeration.Flow;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A IssueHistory.
@@ -18,7 +28,7 @@ import com.frohlich.it.domain.enumeration.Flow;
 @Entity
 @Table(name = "issue_history")
 @Document(indexName = "issuehistory")
-public class IssueHistory implements Serializable {
+public class IssueHistory extends AbstractAuditingEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,18 +44,6 @@ public class IssueHistory implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "flow_end")
     private Flow flowEnd;
-
-    @Column(name = "created_by")
-    private String createdBy;
-
-    @Column(name = "created_date")
-    private Instant createdDate;
-
-    @Column(name = "last_modified_date")
-    private Instant lastModifiedDate;
-
-    @Column(name = "last_modified_by")
-    private String lastModifiedBy;
 
     /**
      * Uma issue pode estar associada a mais de um histórico
@@ -96,58 +94,6 @@ public class IssueHistory implements Serializable {
 
     public void setFlowEnd(Flow flowEnd) {
         this.flowEnd = flowEnd;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public IssueHistory createdBy(String createdBy) {
-        this.createdBy = createdBy;
-        return this;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Instant getCreatedDate() {
-        return createdDate;
-    }
-
-    public IssueHistory createdDate(Instant createdDate) {
-        this.createdDate = createdDate;
-        return this;
-    }
-
-    public void setCreatedDate(Instant createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Instant getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public IssueHistory lastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-        return this;
-    }
-
-    public void setLastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
-
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public IssueHistory lastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-        return this;
-    }
-
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
     }
 
     public Issue getIssue() {

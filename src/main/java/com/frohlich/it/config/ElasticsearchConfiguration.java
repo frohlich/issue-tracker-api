@@ -15,11 +15,13 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.EntityMapper;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
 import org.springframework.data.elasticsearch.core.mapping.SimpleElasticsearchMappingContext;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 import java.io.IOException;
 
 @Configuration
 @EnableConfigurationProperties(ElasticsearchProperties.class)
+@EnableElasticsearchRepositories(basePackages = "com.frohlich.it.search")
 public class ElasticsearchConfiguration {
 
     private ObjectMapper mapper;

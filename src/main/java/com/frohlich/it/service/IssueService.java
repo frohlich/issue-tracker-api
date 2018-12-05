@@ -1,13 +1,16 @@
 package com.frohlich.it.service;
 
-import com.frohlich.it.domain.enumeration.Flow;
-import com.frohlich.it.service.dto.CommentDTO;
-import com.frohlich.it.service.dto.IssueDTO;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
+import com.frohlich.it.domain.enumeration.Flow;
+import com.frohlich.it.service.dto.AttachmentDTO;
+import com.frohlich.it.service.dto.CommentDTO;
+import com.frohlich.it.service.dto.IssueDTO;
+import com.frohlich.it.service.dto.IssueHistoryDTO;
 
 /**
  * Service Interface for managing Issue.
@@ -55,6 +58,8 @@ public interface IssueService {
      * @return the list of entities
      */
     Page<IssueDTO> search(String query, Pageable pageable);
+
+    IssueHistoryDTO flowNext(Long idIssue, CommentDTO commentDTO, List<AttachmentDTO> attachs);
 
     void flowTo(Long idIssue, Flow flow, CommentDTO commentDTO);
 

@@ -28,14 +28,14 @@ public class CustomRepositoryResolver implements RepositoryResolver<HttpServletR
     	File repo = new File(path);
 
         if (repo == null || repo.isDirectory() == false) {
-                        throw new RepositoryNotFoundException(repo);
-                }
+                throw new RepositoryNotFoundException(repo);
+        }
 
-                File gitFile = new File(repo.getPath() + "/" + name + "/.git");
+        File gitFile = new File(repo.getPath() + "/" + name + "/.git");
 
-                if(!gitFile.exists() || !gitFile.isDirectory()) {
-                        throw new RepositoryNotFoundException(gitFile);
-                }
+        if (!gitFile.exists() || !gitFile.isDirectory()) {
+                throw new RepositoryNotFoundException(gitFile);
+        }
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         
@@ -50,9 +50,9 @@ public class CustomRepositoryResolver implements RepositoryResolver<HttpServletR
                 return repository;
             }
         } catch (IOException e) {
-                e.printStackTrace();
-                throw new RepositoryNotFoundException(gitFile);
-                }
+            e.printStackTrace();
+            throw new RepositoryNotFoundException(gitFile);
+        }
 
         return null;
     }

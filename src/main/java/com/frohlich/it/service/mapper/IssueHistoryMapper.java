@@ -13,6 +13,7 @@ public interface IssueHistoryMapper extends EntityMapper<IssueHistoryDTO, IssueH
 
     @Mapping(source = "issue.id", target = "issueId")
     @Mapping(source = "comment.id", target = "commentId")
+    @Mapping(source = "comment.comment", target = "commentDescription")
     IssueHistoryDTO toDto(IssueHistory issueHistory);
 
     @Mapping(source = "issueId", target = "issue")

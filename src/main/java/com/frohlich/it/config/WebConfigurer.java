@@ -55,7 +55,7 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
         EnumSet<DispatcherType> disps = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.ASYNC);
         initMetrics(servletContext, disps);
         if (env.acceptsProfiles(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT)) {
-            initH2Console(servletContext);
+            // initH2Console(servletContext);
         }
         log.info("Web application fully configured");
     }

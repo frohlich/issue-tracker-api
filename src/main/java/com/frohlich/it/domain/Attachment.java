@@ -15,7 +15,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "attachment")
 @Document(indexName = "attachment")
-public class Attachment implements Serializable {
+public class Attachment extends AbstractAuditingEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,18 +32,6 @@ public class Attachment implements Serializable {
 
     @Column(name = "jhi_hash")
     private String hash;
-
-    @Column(name = "created_by")
-    private String createdBy;
-
-    @Column(name = "created_date")
-    private Instant createdDate;
-
-    @Column(name = "last_modified_date")
-    private Instant lastModifiedDate;
-
-    @Column(name = "last_modified_by")
-    private String lastModifiedBy;
 
     @ManyToOne
     @JsonIgnoreProperties("attachments")
@@ -95,58 +83,6 @@ public class Attachment implements Serializable {
 
     public void setHash(String hash) {
         this.hash = hash;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public Attachment createdBy(String createdBy) {
-        this.createdBy = createdBy;
-        return this;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Instant getCreatedDate() {
-        return createdDate;
-    }
-
-    public Attachment createdDate(Instant createdDate) {
-        this.createdDate = createdDate;
-        return this;
-    }
-
-    public void setCreatedDate(Instant createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Instant getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public Attachment lastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-        return this;
-    }
-
-    public void setLastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
-
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public Attachment lastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-        return this;
-    }
-
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
     }
 
     public Comment getComment() {

@@ -41,29 +41,27 @@ spring:
         serialization.indent_output: true
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:h2:file:./target/h2db/db/issuetracker;DB_CLOSE_DELAY=-1
-        username: IssueTracker
-        password:
+        url: jdbc:postgresql://localhost:5432/it
+        username: it
+        password: it
         hikari:
             auto-commit: false
-    h2:
-        console:
-            enabled: false
     jpa:
-        database-platform: io.github.jhipster.domain.util.FixedH2Dialect
-        database: H2
+        database-platform: io.github.jhipster.domain.util.FixedPostgreSQL82Dialect
+        database: POSTGRESQL
         show-sql: true
         properties:
             hibernate.id.new_generator_mappings: true
             hibernate.connection.provider_disables_autocommit: true
             hibernate.cache.use_second_level_cache: false
             hibernate.cache.use_query_cache: false
-            hibernate.generate_statistics: true
+            hibernate.generate_statistics: false
     data:
-        elasticsearch:
-            properties:
-                path:
-                    home: target/elasticsearch
+#        elasticsearch:
+#            properties:
+#                base-package: "com.owish.search"
+        jest:
+            uri: http://localhost:9200
     liquibase:
         contexts: dev
     mail:
@@ -121,15 +119,6 @@ jhipster:
             host: localhost
             port: 5000
             queue-size: 512
-
-# ===================================================================
-# Application specific properties
-# Add your own application properties here, see the ApplicationProperties class
-# to have type-safe configuration, like in the JHipsterProperties above
-#
-# More documentation is available at:
-# https://www.jhipster.tech/common-application-properties/
-# ===================================================================
 
 application:
     file:

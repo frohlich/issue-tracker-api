@@ -15,7 +15,7 @@ public interface RepositoryService {
      * @param Project the entity to create repository
      * @return the persisted entity
      */
-    Repository create(ProjectDTO projectDTO) throws IOException;
+    Repository create(String name) throws IOException;
 
     /**
      * Create an Repository with Default commit.
@@ -23,7 +23,7 @@ public interface RepositoryService {
      * @param Project the entity to create repository
      * @return the persisted entity
      */
-    Repository createWithFirstCommit(ProjectDTO projectDTO) throws IOException, GitAPIException;
+    Repository createWithFirstCommit(String name) throws IOException, GitAPIException;
     /**
      * Create first commit.
      *

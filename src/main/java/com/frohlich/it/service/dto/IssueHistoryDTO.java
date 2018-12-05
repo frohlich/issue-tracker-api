@@ -11,7 +11,9 @@ import com.frohlich.it.domain.enumeration.Flow;
  */
 public class IssueHistoryDTO implements Serializable {
 
-    private Long id;
+	private static final long serialVersionUID = 1L;
+
+	private Long id;
 
     private Flow flowStart;
 
@@ -28,8 +30,18 @@ public class IssueHistoryDTO implements Serializable {
     private Long issueId;
 
     private Long commentId;
+    
+    private String commentDescription;
 
-    public Long getId() {
+    public String getCommentDescription() {
+		return commentDescription;
+	}
+
+	public void setCommentDescription(String commentDescription) {
+		this.commentDescription = commentDescription;
+	}
+
+	public Long getId() {
         return id;
     }
 

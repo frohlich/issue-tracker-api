@@ -64,20 +64,24 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project project = projectMapper.toEntity(projectDTO);
 
-        final Optional<User> isUser = userService.getUserWithAuthorities();
+        if (projectDTO.getId() == null || projectDTO.getId() <= 0) {
+            final Optional<User> isUser = userService.getUserWithAuthorities();
 
-        project.setOwnedBy(isUser.get());
-        project = projectRepository.save(project);
-
-        try {
-            repositoryService.createWithFirstCommit(projectDTO);
-        } catch (IOException e) {
-            throw new UnsupportedOperationException();
-            // TODO: Trocar IOException
-        } catch (GitAPIException e) {
-            throw new UnsupportedOperationException();
-            // TODO: Trocar GitAPIException
+            if (isUser.isPresent()) {
+                project.setSuspended(false);
+                project.setOwnedBy(isUser.get());
+            }
+            try {
+                repositoryService.createWithFirstCommit(project.getTitle());
+            } catch (IOException e) {
+                throw new UnsupportedOperationException();
+                // TODO: Trocar IOException
+            } catch (GitAPIException e) {
+                throw new UnsupportedOperationException();
+                // TODO: Trocar GitAPIException
+            }
         }
+        project = projectRepository.save(project);
 
         return projectMapper.toDto(project);
     }

@@ -1,31 +1,36 @@
 package com.frohlich.it.service.impl;
 
-import com.frohlich.it.domain.User;
-import com.frohlich.it.domain.enumeration.Flow;
-import com.frohlich.it.domain.enumeration.IssueType;
-import com.frohlich.it.domain.enumeration.Priority;
-import com.frohlich.it.service.CommentService;
-import com.frohlich.it.service.IssueService;
-import com.frohlich.it.domain.Issue;
-import com.frohlich.it.repository.IssueRepository;
-import com.frohlich.it.repository.search.IssueSearchRepository;
-import com.frohlich.it.service.UserService;
-import com.frohlich.it.service.dto.CommentDTO;
-import com.frohlich.it.service.dto.IssueDTO;
-import com.frohlich.it.service.mapper.IssueMapper;
-import com.frohlich.it.web.rest.errors.BadRequestAlertException;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.Optional;
-
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import com.frohlich.it.domain.Issue;
+import com.frohlich.it.domain.User;
+import com.frohlich.it.domain.enumeration.Flow;
+import com.frohlich.it.domain.enumeration.IssueType;
+import com.frohlich.it.domain.enumeration.Priority;
+import com.frohlich.it.repository.IssueRepository;
+import com.frohlich.it.repository.search.IssueSearchRepository;
+import com.frohlich.it.service.AttachmentService;
+import com.frohlich.it.service.CommentService;
+import com.frohlich.it.service.IssueHistoryService;
+import com.frohlich.it.service.IssueService;
+import com.frohlich.it.service.UserService;
+import com.frohlich.it.service.dto.AttachmentDTO;
+import com.frohlich.it.service.dto.CommentDTO;
+import com.frohlich.it.service.dto.IssueDTO;
+import com.frohlich.it.service.dto.IssueHistoryDTO;
+import com.frohlich.it.service.mapper.IssueMapper;
+import com.frohlich.it.web.rest.errors.BadRequestAlertException;
 
 /**
  * Service Implementation for managing Issue.
@@ -41,19 +46,26 @@ public class IssueServiceImpl implements IssueService {
     private IssueMapper issueMapper;
 
     private IssueSearchRepository issueSearchRepository;
+    
+    private IssueHistoryService issueHistoryService;
 
     private UserService userService;
 
     private CommentService commentService;
+    
+    private AttachmentService attachmentService;
 
     public IssueServiceImpl(IssueRepository issueRepository, IssueMapper issueMapper,
                             IssueSearchRepository issueSearchRepository, UserService userService,
-                            CommentService commentService) {
+                            CommentService commentService, IssueHistoryService issueHistoryService,
+                            AttachmentService attachmentService) {
         this.issueRepository = issueRepository;
         this.issueMapper = issueMapper;
         this.issueSearchRepository = issueSearchRepository;
         this.userService = userService;
         this.commentService = commentService;
+        this.issueHistoryService = issueHistoryService;
+        this.attachmentService = attachmentService;
     }
 
     /**
@@ -65,11 +77,22 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public IssueDTO save(IssueDTO issueDTO) {
         log.debug("Request to save Issue : {}", issueDTO);
-
+        
         Issue issue = issueMapper.toEntity(issueDTO);
+        
+        if (issueDTO.getId() == null) {
+        	final Optional<User> user = userService.getUserWithAuthorities();
+            issue.setStatus(Flow.BACKLOG);
+            
+            if (user.isPresent()) {
+                issue.setAssignedTo(user.get());
+            }
+        }
+        
         issue = issueRepository.save(issue);
         IssueDTO result = issueMapper.toDto(issue);
         issueSearchRepository.save(issue);
+        log.debug("Antes do result");
         return result;
     }
 
@@ -129,12 +152,41 @@ public class IssueServiceImpl implements IssueService {
             .map(issueMapper::toDto);
     }
 
-    /**
-     * Advance Flow.BACKLOG to Flow.SPECIFICATION.
-     *
-     * @param idIssue the id of the entity.
-     * @param commentDTO new comment.
-     */
+    @Transactional
+    public IssueHistoryDTO flowNext (Long idIssue, CommentDTO commentDTO, List<AttachmentDTO> attachs) {
+        final Optional<Issue> issue = issueRepository.findById(idIssue);
+
+        if (!issue.isPresent()) {
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "idnull");
+        }
+
+        Flow startFlow = issue.get().getStatus();
+        Flow endFlow = Flow.values()[(startFlow.ordinal() + 1 % Flow.values().length)];
+        
+        issue.get().setStatus(endFlow);
+
+        // TODO: Send Mail;
+
+        commentDTO = this.commentService.save(commentDTO);
+
+        final Issue issueResult = this.issueRepository.save(issue.get());
+        
+        IssueHistoryDTO ihDTO = new IssueHistoryDTO();
+        
+        ihDTO.setFlowStart(startFlow);
+        ihDTO.setFlowEnd(endFlow);
+        ihDTO.setCommentId(commentDTO.getId());
+        ihDTO.setIssueId(issueResult.getId());
+        
+        for (AttachmentDTO att : attachs) {
+        	att.setCommentId(commentDTO.getId());
+        	this.attachmentService.save(att);
+        }
+
+        ihDTO = this.issueHistoryService.save(ihDTO);
+        return ihDTO;
+    }
+
     @Transactional
     public void flowTo (Long idIssue, Flow flow, CommentDTO commentDTO) {
         final Optional<Issue> issue = issueRepository.findById(idIssue);

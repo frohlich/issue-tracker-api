@@ -2,13 +2,17 @@ package com.frohlich.it.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.frohlich.it.domain.enumeration.Flow;
+import com.frohlich.it.service.AttachmentService;
 import com.frohlich.it.service.IssueService;
+import com.frohlich.it.service.dto.AttachmentDTO;
 import com.frohlich.it.service.dto.CommentDTO;
 import com.frohlich.it.service.impl.FileStorageService;
 import com.frohlich.it.web.rest.errors.BadRequestAlertException;
 import com.frohlich.it.web.rest.util.HeaderUtil;
 import com.frohlich.it.web.rest.util.PaginationUtil;
 import com.frohlich.it.service.dto.IssueDTO;
+import com.frohlich.it.service.dto.IssueHistoryDTO;
+
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +28,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,11 +52,12 @@ public class IssueResource {
 
     private IssueService issueService;
     private FileStorageService fileStorageService;
+    private AttachmentService attachmentService;
 
-    public IssueResource(IssueService issueService, FileStorageService fileStorageService) {
-
+    public IssueResource(IssueService issueService, FileStorageService fileStorageService, AttachmentService attachmentService) {
         this.issueService = issueService;
         this.fileStorageService = fileStorageService;
+        this.attachmentService = attachmentService;
     }
 
     /**
@@ -155,48 +162,56 @@ public class IssueResource {
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
 
-    private UploadFileResponse uploadFile(MultipartFile file) {
+    private AttachmentDTO uploadFile(MultipartFile file) {
         String fileName = fileStorageService.storeFile(file);
 
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("/downloadFile/")
             .path(fileName)
             .toUriString();
-
-        return new UploadFileResponse(fileName, fileDownloadUri,
-            file.getContentType(), file.getSize());
+        
+        AttachmentDTO dto = new AttachmentDTO();
+        
+        dto.setHash(file.getContentType());
+        dto.setFilename(fileName);
+        // dto.setSize(file.getSize());
+        return dto;
+        
+        /*return new UploadFileResponse(fileName, fileDownloadUri,
+            file.getContentType(), file.getSize());*/
     }
 
-    @PostMapping("/issues/{issueId}/flow/{flowId}")
-    public List<UploadFileResponse> flow(
+    @PostMapping("/issues/{issueId}/flow")
+    public IssueHistoryDTO flow(
         @PathVariable Long issueId,
-        @PathVariable Long flowId,
         @RequestParam("files") MultipartFile[] files,
         @RequestParam("comment") String comment) {
 
         log.debug(" UPLOAD :" + comment);
-        log.debug(" FLOW ID:" + flowId.toString());
+        // log.debug(" FLOW ID:" + flowId.toString());
         log.debug(" ISSUE ID:" + issueId.toString());
         log.debug(" Attachments number:" + String.valueOf(files.length));
 
-        if (issueId.equals(null) || flowId.equals(null)) {
+        if (issueId.equals(null)) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
 
-        if (!Flow.contains(flowId.toString())) {
-            throw new BadRequestAlertException("Invalid flow", ENTITY_NAME, "idnull");
-        }
-
+        ArrayList<AttachmentDTO> attachs = new ArrayList<AttachmentDTO>();
+        for (int i = 0; i < files.length; i++) {
+        	attachs.add(this.uploadFile(files[i]));
+		}
+        
         CommentDTO dto = new CommentDTO();
         dto.setComment(comment);
         dto.setIssueId(issueId);
 
-        this.issueService.flowTo(issueId, Flow.FINISHED, dto);
-
-        return Arrays.asList(files)
+        return this.issueService.flowNext(issueId, dto, attachs);
+     
+        /*return Arrays.asList(files)
             .stream()
             .map(file -> uploadFile(file))
             .collect(Collectors.toList());
+    */
     }
 	
     /**

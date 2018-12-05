@@ -3,6 +3,7 @@ package com.frohlich.it.service.impl;
 import com.frohlich.it.config.ApplicationProperties;
 import com.frohlich.it.service.RepositoryService;
 import com.frohlich.it.service.dto.ProjectDTO;
+import com.frohlich.it.service.impl.errors.FileStorageException;
 import com.google.common.base.CaseFormat;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
@@ -16,28 +17,37 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 
 @Service
 @Transactional
 public class RepositoryServiceImpl implements RepositoryService {
 
 
-    private final ApplicationProperties.Repository repository;
+    private Path repositoryDir;
 
     private final Logger log = LoggerFactory.getLogger(RepositoryServiceImpl.class);
 
     RepositoryServiceImpl(ApplicationProperties applicationProperties) {
-        this.repository = applicationProperties.getRepository();
+        this.repositoryDir = Paths.get(applicationProperties.getRepository().getRepoDir()).toAbsolutePath().normalize();
+
+        try {
+            Files.createDirectories(this.repositoryDir);
+        } catch (Exception ex) {
+            throw new FileStorageException("Could not create the directory where the repositories files will be stored.", ex);
+        }
     }
 
     @Override
-    public Repository create(ProjectDTO projectDTO) throws IOException  {
-        String repoName = this.generateRepositoryName(projectDTO.getTitle());
-        File localPath = new File(repository.getRepoDir() + repoName);
+    public Repository create(String name) throws IOException  {
+        String repoName = this.generateRepositoryName(name);
+        File localPath = new File(repositoryDir + repoName);
 
         Repository repository = FileRepositoryBuilder.create(new File(localPath, ".git"));
 
-        repository.create();
+        repository.create(true);
 
         repository.getConfig().setBoolean("http", null, "receivepack", true);
         repository.getConfig().save();
@@ -46,13 +56,14 @@ public class RepositoryServiceImpl implements RepositoryService {
     }
 
     @Override
-    public Repository createWithFirstCommit(ProjectDTO projectDTO) throws IOException, GitAPIException{
-        final Repository repository = this.create(projectDTO);
+    public Repository createWithFirstCommit(String name) throws IOException, GitAPIException{
+        final Repository repository = this.create(name);
         this.createFirstCommit(repository);
         return repository;
     }
 
     private String generateRepositoryName(String name) {
+        name = name.replaceAll("[^a-zA-Z0-9]+","");
         return "/" + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name.replaceAll(" ", "_").toUpperCase());
     }
 
@@ -83,7 +94,7 @@ public class RepositoryServiceImpl implements RepositoryService {
     /**
      * Delete the "id" project.
      *
-     * @param id the id of the entity
+     * @param localPath the local path of the entity
      */
 
     public void delete(String localPath) throws IOException {
