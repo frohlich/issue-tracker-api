@@ -1,6 +1,7 @@
 package com.frohlich.it.service.impl;
 
 import com.frohlich.it.service.IssueHistoryService;
+import com.frohlich.it.domain.Issue;
 import com.frohlich.it.domain.IssueHistory;
 import com.frohlich.it.repository.IssueHistoryRepository;
 import com.frohlich.it.repository.search.IssueHistorySearchRepository;
@@ -8,12 +9,14 @@ import com.frohlich.it.service.dto.IssueHistoryDTO;
 import com.frohlich.it.service.mapper.IssueHistoryMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
@@ -111,4 +114,23 @@ public class IssueHistoryServiceImpl implements IssueHistoryService {
         return issueHistorySearchRepository.search(queryStringQuery(query), pageable)
             .map(issueHistoryMapper::toDto);
     }
+
+	@Override
+	public List<IssueHistoryDTO> findByIssueId(Long issueId) {
+		IssueHistory ih = new IssueHistory();
+		Issue is = new Issue();
+		is.setId(issueId);
+		ih.setIssue(is);
+		Example<IssueHistory> eih = Example.of(ih);
+		
+		List<IssueHistory> lista = this.issueHistoryRepository.findAll(eih);
+		List<IssueHistoryDTO> result = new ArrayList<IssueHistoryDTO>();
+		
+		for (IssueHistory item : lista) {
+			result.add(issueHistoryMapper.toDto(item));
+		}
+		
+		return result;
+	}
+
 }

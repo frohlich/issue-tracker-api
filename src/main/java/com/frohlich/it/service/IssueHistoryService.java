@@ -5,6 +5,7 @@ import com.frohlich.it.service.dto.IssueHistoryDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -53,4 +54,6 @@ public interface IssueHistoryService {
      * @return the list of entities
      */
     Page<IssueHistoryDTO> search(String query, Pageable pageable);
+
+	List<IssueHistoryDTO> findByIssueId(Long issueId);
 }

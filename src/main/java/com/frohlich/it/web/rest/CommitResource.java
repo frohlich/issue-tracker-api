@@ -1,11 +1,17 @@
 package com.frohlich.it.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.frohlich.it.domain.Commit;
+import com.frohlich.it.domain.IssueHistory;
+import com.frohlich.it.repository.CommitRepository;
 import com.frohlich.it.service.CommitService;
 import com.frohlich.it.web.rest.errors.BadRequestAlertException;
 import com.frohlich.it.web.rest.util.HeaderUtil;
 import com.frohlich.it.web.rest.util.PaginationUtil;
 import com.frohlich.it.service.dto.CommitDTO;
+import com.frohlich.it.service.dto.IssueHistoryDTO;
+import com.frohlich.it.service.mapper.CommitMapper;
+
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -38,9 +44,15 @@ public class CommitResource {
     private static final String ENTITY_NAME = "commit";
 
     private CommitService commitService;
+    
+    private CommitRepository commitRepository;
+    
+    private CommitMapper commitMapper;
 
-    public CommitResource(CommitService commitService) {
+    public CommitResource(CommitService commitService, CommitRepository commitRepository, CommitMapper commitMapper) {
         this.commitService = commitService;
+        this.commitRepository = commitRepository;
+        this.commitMapper = commitMapper;
     }
 
     /**
@@ -121,6 +133,19 @@ public class CommitResource {
         Page<CommitDTO> page = commitService.search(query, pageable);
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/commits");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+    }
+    
+    @GetMapping("/commits/byissueid/{issueId}")
+    @Timed
+    public ResponseEntity<List<CommitDTO>> byissueid (@PathVariable Long issueId) {
+    	List<Commit> all = this.commitRepository.findByIssueId(issueId);
+    	List<CommitDTO> result = new ArrayList<CommitDTO>();
+    	
+    	for(Commit item : all) {
+    		result.add(this.commitMapper.toDto(item));
+    	}
+        
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }

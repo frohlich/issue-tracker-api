@@ -1,0 +1,22 @@
+Roteiro de Apresentação:
+
+	Projeto:
+	Issue Tracker
+
+	Tarefas:
+	FEATURE: Lista de Pedidos
+	Eu como representante comercial gostaria de pode visualizar a lista de pedidos dos meus clientes.
+	
+	FEATURE: Lista de Titulos
+	Como Gestor Comercial, quero visualizar a lista de todos os títulos pagos, a vencer e vencidos do cliente, para avaliar o crédito.
+
+-----------------------------------------------------------------------
+
+docker stop $(docker ps -aq)
+
+docker run --name database-issuetracker -d -p 5432:5432 -e POSTGRES_PASSWORD=it -e POSTGRES_USER=it postgres:10.6-alpine
+
+docker-compose -f src/main/docker/elasticsearch.yml up
+
+
+

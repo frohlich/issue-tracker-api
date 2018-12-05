@@ -1,11 +1,15 @@
 package com.frohlich.it.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.frohlich.it.domain.IssueHistory;
+import com.frohlich.it.repository.IssueHistoryRepository;
 import com.frohlich.it.service.IssueHistoryService;
 import com.frohlich.it.web.rest.errors.BadRequestAlertException;
 import com.frohlich.it.web.rest.util.HeaderUtil;
 import com.frohlich.it.web.rest.util.PaginationUtil;
 import com.frohlich.it.service.dto.IssueHistoryDTO;
+import com.frohlich.it.service.mapper.IssueHistoryMapper;
+
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -37,9 +41,15 @@ public class IssueHistoryResource {
     private static final String ENTITY_NAME = "issueHistory";
 
     private IssueHistoryService issueHistoryService;
+    
+    private IssueHistoryRepository issueHistoryRepository;
+    
+    private IssueHistoryMapper issueHistoryMapper;
 
-    public IssueHistoryResource(IssueHistoryService issueHistoryService) {
+    public IssueHistoryResource(IssueHistoryService issueHistoryService, IssueHistoryRepository issueHistoryRepository, IssueHistoryMapper issueHistoryMapper) {
         this.issueHistoryService = issueHistoryService;
+        this.issueHistoryRepository = issueHistoryRepository;
+        this.issueHistoryMapper = issueHistoryMapper;
     }
 
     /**
@@ -143,5 +153,19 @@ public class IssueHistoryResource {
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/issue-histories");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
+    
+    @GetMapping("/issue-histories/byissueid/{issueId}")
+    @Timed
+    public ResponseEntity<List<IssueHistoryDTO>> byissueid (@PathVariable Long issueId) {
+        //List<IssueHistoryDTO> all = issueHistoryService.findByIssueId(issueId);  
+    	List<IssueHistory> all = this.issueHistoryRepository.findByIssueId(issueId);
+    	List<IssueHistoryDTO> result = new ArrayList<IssueHistoryDTO>();
+    	for(IssueHistory item : all) {
+    		result.add(this.issueHistoryMapper.toDto(item));
+    	}
+        
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    
 
 }
