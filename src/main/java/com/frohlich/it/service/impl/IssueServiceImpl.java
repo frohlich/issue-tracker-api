@@ -1,3 +1,4 @@
+
 package com.frohlich.it.service.impl;
 
 import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
@@ -18,6 +19,7 @@ import com.frohlich.it.domain.User;
 import com.frohlich.it.domain.enumeration.Flow;
 import com.frohlich.it.domain.enumeration.IssueType;
 import com.frohlich.it.domain.enumeration.Priority;
+import com.frohlich.it.repository.CommitRepository;
 import com.frohlich.it.repository.IssueRepository;
 import com.frohlich.it.repository.search.IssueSearchRepository;
 import com.frohlich.it.service.AttachmentService;
@@ -31,8 +33,6 @@ import com.frohlich.it.service.dto.IssueDTO;
 import com.frohlich.it.service.dto.IssueHistoryDTO;
 import com.frohlich.it.service.mapper.IssueMapper;
 import com.frohlich.it.web.rest.errors.BadRequestAlertException;
-
-import aj.org.objectweb.asm.Type;
 
 /**
  * Service Implementation for managing Issue.
@@ -56,11 +56,13 @@ public class IssueServiceImpl implements IssueService {
     private CommentService commentService;
     
     private AttachmentService attachmentService;
+    
+    private CommitRepository commitRepository;
 
     public IssueServiceImpl(IssueRepository issueRepository, IssueMapper issueMapper,
                             IssueSearchRepository issueSearchRepository, UserService userService,
                             CommentService commentService, IssueHistoryService issueHistoryService,
-                            AttachmentService attachmentService) {
+                            AttachmentService attachmentService, CommitRepository commitRepository ) {
         this.issueRepository = issueRepository;
         this.issueMapper = issueMapper;
         this.issueSearchRepository = issueSearchRepository;
@@ -68,6 +70,7 @@ public class IssueServiceImpl implements IssueService {
         this.commentService = commentService;
         this.issueHistoryService = issueHistoryService;
         this.attachmentService = attachmentService;
+        this.commitRepository = commitRepository;
     }
 
     /**
@@ -291,6 +294,10 @@ public class IssueServiceImpl implements IssueService {
 
         if (!issue.isPresent()) {
             throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "idnull");
+        }
+        
+        if (this.commitRepository.findByIssueId(idIssue).size() > 0) {
+            throw new BadRequestAlertException("Já existem commits para essa tarefa", "Issue", "hascommits");
         }
 
         Flow startFlow = issue.get().getStatus();

@@ -61,4 +61,6 @@ public interface ProjectService {
      * @return the list of entities
      */
     Page<ProjectDTO> search(String query, Pageable pageable);
+    
+    ProjectDTO findByRepositoryName(String repoName);
 }

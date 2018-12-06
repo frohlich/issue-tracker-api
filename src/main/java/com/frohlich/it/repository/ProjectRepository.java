@@ -1,6 +1,8 @@
 package com.frohlich.it.repository;
 
 import com.frohlich.it.domain.Project;
+import com.google.common.base.Optional;
+
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -18,5 +20,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     @Query("SELECT COUNT(u) FROM #{#entityName} u")
     Long countRegisters();
+
+    @Query("SELECT u FROM #{#entityName} u WHERE u.repository = ?1")
+    Project findByRepositoryName(String repoName);    
     
 }

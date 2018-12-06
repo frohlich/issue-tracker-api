@@ -120,6 +120,14 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findById(id)
             .map(projectMapper::toDto);
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public ProjectDTO findByRepositoryName(String repoName) {
+        log.debug("findByRepositoryName " + repoName);
+        return projectMapper.toDto(
+        		projectRepository.findByRepositoryName(repoName));
+    }
 
     /**
      * Delete the project by id.

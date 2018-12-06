@@ -14,9 +14,10 @@ Roteiro de Apresentação:
 
 docker stop $(docker ps -aq)
 
+docker start c00f70929478 34b3dedba35f
+
 docker run --name database-issuetracker -d -p 5432:5432 -e POSTGRES_PASSWORD=it -e POSTGRES_USER=it postgres:10.6-alpine
 
 docker-compose -f src/main/docker/elasticsearch.yml up -d
-
 
 

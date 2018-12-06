@@ -278,7 +278,7 @@ public class IssueResource {
      * @param idIssue the id the entity.
      * @param idUser  the id of new user.
      */
-    @PostMapping("/issues/:id/changeowner/:idUser")
+    @PostMapping("/issues/:id/assignto/:idUser")
     public void changeOwner(@PathVariable Long idIssue, @PathVariable Long idUser) {
 
         if (idIssue.equals(null) || idUser.equals(null)) {

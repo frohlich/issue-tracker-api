@@ -40,6 +40,8 @@ public class ITUploadPackFilter implements Filter {
         
         System.out.println("###############: " + project.get().getTitle());
         
+        // Authorization: Basic YWRtaW46YWRtaW4=
+        // Authorization: Basic admin:admin
         
         //ProjectDTO project = this.projectService.findOne();
 
