@@ -1,18 +1,20 @@
 package com.frohlich.it.service.mapper;
 
-import com.frohlich.it.domain.*;
-import com.frohlich.it.service.dto.ProjectDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import org.mapstruct.*;
+import com.frohlich.it.domain.Project;
+import com.frohlich.it.service.dto.ProjectDTO;
 
 /**
  * Mapper for the entity Project and its DTO ProjectDTO.
  */
-@Mapper(componentModel = "spring", uses = {UserMapper.class})
+@Mapper(componentModel = "spring", uses = {UserMapper.class, RepositoryURLNormalize.class})
 public interface ProjectMapper extends EntityMapper<ProjectDTO, Project> {
 
     @Mapping(source = "ownedBy.id", target = "ownedById")
     @Mapping(source = "ownedBy.login", target = "ownedByLogin")
+    @Mapping(source = "repository", target = "repository", qualifiedByName = "repositoryURLNormalize")
     ProjectDTO toDto(Project project);
 
     @Mapping(target = "issues", ignore = true)

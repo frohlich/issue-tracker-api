@@ -71,5 +71,5 @@ public interface IssueService {
 
     void changeType(Long idIssue, String newType);
 
-    void cancel(Long idIssue, CommentDTO commentDTO);
+    IssueHistoryDTO cancel(Long idIssue, CommentDTO commentDTO, List<AttachmentDTO> attachs);
 }

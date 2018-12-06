@@ -157,9 +157,9 @@ public class IssueHistoryResource {
     @GetMapping("/issue-histories/byissueid/{issueId}")
     @Timed
     public ResponseEntity<List<IssueHistoryDTO>> byissueid (@PathVariable Long issueId) {
-        //List<IssueHistoryDTO> all = issueHistoryService.findByIssueId(issueId);  
-    	List<IssueHistory> all = this.issueHistoryRepository.findByIssueId(issueId);
+        List<IssueHistory> all = this.issueHistoryRepository.findByIssueId(issueId);
     	List<IssueHistoryDTO> result = new ArrayList<IssueHistoryDTO>();
+    	
     	for(IssueHistory item : all) {
     		result.add(this.issueHistoryMapper.toDto(item));
     	}

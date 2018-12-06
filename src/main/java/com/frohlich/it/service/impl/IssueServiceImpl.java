@@ -278,20 +278,40 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override @Transactional
-    public void cancel(Long idIssue, CommentDTO commentDTO) {
+    public  IssueHistoryDTO cancel (Long idIssue, CommentDTO commentDTO, List<AttachmentDTO> attachs) {
         final Optional<Issue> issue = issueRepository.findById(idIssue);
         final Optional<User> user = userService.getUserWithAuthorities();
 
         if (!issue.isPresent()) {
-            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "");
+            throw new BadRequestAlertException("Invalid parameter", Issue.class.getName(), "idnull");
         }
 
-        this.commentService.save(commentDTO);
-
+        Flow startFlow = issue.get().getStatus();
+        Flow endFlow = Flow.CANCELED;
+        
         issue.get().setClosedBy(user.get());
         issue.get().setClosedAt(Instant.now());
-        issue.get().setStatus(Flow.CANCELED);
+        issue.get().setStatus(endFlow);
 
-        this.issueRepository.save(issue.get());
+        // TODO: Send Mail;
+
+        commentDTO = this.commentService.save(commentDTO);
+
+        final Issue issueResult = this.issueRepository.save(issue.get());
+        
+        IssueHistoryDTO ihDTO = new IssueHistoryDTO();
+        
+        ihDTO.setFlowStart(startFlow);
+        ihDTO.setFlowEnd(endFlow);
+        ihDTO.setCommentId(commentDTO.getId());
+        ihDTO.setIssueId(issueResult.getId());
+        
+        for (AttachmentDTO att : attachs) {
+        	att.setCommentId(commentDTO.getId());
+        	this.attachmentService.save(att);
+        }
+
+        ihDTO = this.issueHistoryService.save(ihDTO);
+        return ihDTO;
     }
 }

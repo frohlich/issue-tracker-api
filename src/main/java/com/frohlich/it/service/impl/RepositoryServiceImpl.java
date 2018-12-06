@@ -1,10 +1,11 @@
 package com.frohlich.it.service.impl;
 
-import com.frohlich.it.config.ApplicationProperties;
-import com.frohlich.it.service.RepositoryService;
-import com.frohlich.it.service.dto.ProjectDTO;
-import com.frohlich.it.service.impl.errors.FileStorageException;
-import com.google.common.base.CaseFormat;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -15,11 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
+import com.frohlich.it.config.ApplicationProperties;
+import com.frohlich.it.service.RepositoryService;
+import com.frohlich.it.service.impl.errors.FileStorageException;
 
 @Service
 @Transactional
@@ -42,7 +41,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     @Override
     public Repository create(String name) throws IOException  {
-        String repoName = this.generateRepositoryName(name);
+        String repoName = "/" + name;
         File localPath = new File(repositoryDir + repoName);
 
         Repository repository = FileRepositoryBuilder.create(new File(localPath, ".git"));
@@ -60,11 +59,6 @@ public class RepositoryServiceImpl implements RepositoryService {
         final Repository repository = this.create(name);
         this.createFirstCommit(repository);
         return repository;
-    }
-
-    private String generateRepositoryName(String name) {
-        name = name.replaceAll("[^a-zA-Z0-9]+","");
-        return "/" + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name.replaceAll(" ", "_").toUpperCase());
     }
 
     @Override

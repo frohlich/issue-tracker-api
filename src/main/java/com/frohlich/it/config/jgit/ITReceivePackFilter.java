@@ -12,6 +12,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jgit.http.server.GitSmartHttpTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
@@ -45,8 +46,15 @@ public class ITReceivePackFilter implements Filter {
         
         
         System.out.println("@@@@@@@@@@: " + project.get().getTitle());
-        chain.doFilter(request, response);
-
+        
+        
+        GitSmartHttpTools.sendError(
+                (HttpServletRequest) request,
+                (HttpServletResponse) response,
+                HttpServletResponse.SC_FORBIDDEN,
+                "receive-pack not permitted on this server");
+            return;
+            // chain.doFilter(request, response);
 	}
 
 	@Override

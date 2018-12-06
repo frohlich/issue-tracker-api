@@ -43,6 +43,8 @@ public class ApplicationProperties {
     public class Repository {
         @Nullable
         private String repoDir;
+        @Nullable
+        private String baseUrl;
 
         Repository () {
 
@@ -55,5 +57,14 @@ public class ApplicationProperties {
         public void setRepoDir(String repoDir) {
             this.repoDir = repoDir;
         }
+
+		public String getBaseUrl() {
+			return baseUrl;
+		}
+
+		public void setBaseUrl(String baseUrl) {
+			this.baseUrl = baseUrl;
+		}
+        
     }
 }

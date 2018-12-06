@@ -2,6 +2,7 @@ package com.frohlich.it.service.impl;
 
 import com.frohlich.it.domain.User;
 import com.frohlich.it.service.ProjectService;
+import com.frohlich.it.config.ApplicationProperties;
 import com.frohlich.it.domain.Project;
 import com.frohlich.it.repository.ProjectRepository;
 import com.frohlich.it.repository.search.ProjectSearchRepository;
@@ -41,15 +42,18 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMapper projectMapper;
 
     private final ProjectSearchRepository projectSearchRepository;
+    
+    private final ApplicationProperties applicationProperties;
 
     public ProjectServiceImpl(ProjectRepository projectRepository, ProjectMapper projectMapper,
                               ProjectSearchRepository projectSearchRepository, UserService userService,
-                              RepositoryService repositoryService) {
+                              RepositoryService repositoryService, ApplicationProperties applicationProperties) {
         this.projectRepository = projectRepository;
         this.projectMapper = projectMapper;
         this.projectSearchRepository = projectSearchRepository;
         this.userService = userService;
         this.repositoryService = repositoryService;
+        this.applicationProperties = applicationProperties;
     }
 
     /**
@@ -68,11 +72,13 @@ public class ProjectServiceImpl implements ProjectService {
             final Optional<User> isUser = userService.getUserWithAuthorities();
 
             if (isUser.isPresent()) {
+            	String repoName = RepositoryUtil.generateRepositoryName(project.getTitle());
+            	project.setRepository(repoName);
                 project.setSuspended(false);
                 project.setOwnedBy(isUser.get());
             }
             try {
-                repositoryService.createWithFirstCommit(project.getTitle());
+                repositoryService.createWithFirstCommit(project.getRepository());
             } catch (IOException e) {
                 throw new UnsupportedOperationException();
                 // TODO: Trocar IOException

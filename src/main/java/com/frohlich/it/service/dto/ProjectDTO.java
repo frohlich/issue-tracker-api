@@ -15,7 +15,9 @@ public class ProjectDTO implements Serializable {
     @NotNull
     @Size(min = 3, max = 50)
     private String title;
-
+    
+    private String repository;
+    
     private Boolean suspended;
 
     private String createdBy;
@@ -102,7 +104,15 @@ public class ProjectDTO implements Serializable {
         this.ownedByLogin = userLogin;
     }
 
-    @Override
+    public String getRepository() {
+		return repository;
+	}
+
+	public void setRepository(String repository) {
+		this.repository = repository;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

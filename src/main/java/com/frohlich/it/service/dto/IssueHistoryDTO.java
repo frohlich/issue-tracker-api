@@ -1,9 +1,10 @@
 package com.frohlich.it.service.dto;
 
-import java.time.Instant;
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
-import com.frohlich.it.domain.enumeration.Flow;
+
 import com.frohlich.it.domain.enumeration.Flow;
 
 /**
@@ -32,8 +33,18 @@ public class IssueHistoryDTO implements Serializable {
     private Long commentId;
     
     private String commentDescription;
+    
+    private List<AttachmentDTO> attachments;
+    
+    public List<AttachmentDTO> getAttachments() {
+		return attachments;
+	}
 
-    public String getCommentDescription() {
+	public void setAttachments(List<AttachmentDTO> attachments) {
+		this.attachments = attachments;
+	}
+
+	public String getCommentDescription() {
 		return commentDescription;
 	}
 

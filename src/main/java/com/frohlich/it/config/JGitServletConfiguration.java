@@ -34,7 +34,6 @@ public class JGitServletConfiguration {
         gs.addUploadPackFilter(new ITUploadPackFilter());
         gs.addReceivePackFilter(new ITReceivePackFilter());
 
-
         registration.addUrlMappings("/git/*");
         registration.setServlet(gs);
 

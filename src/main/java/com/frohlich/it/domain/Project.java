@@ -43,6 +43,11 @@ public class Project extends AbstractAuditingEntity implements Serializable {
     @Size(min = 3, max = 50)
     @Column(name = "title", length = 50, nullable = false)
     private String title;
+    
+    @NotNull
+    @Size(min = 3, max = 50)
+    @Column(name = "repository", length = 50, nullable = false)
+    private String repository;
 
     @Column(name = "suspended")
     private Boolean suspended;
@@ -133,9 +138,19 @@ public class Project extends AbstractAuditingEntity implements Serializable {
     public void setOwnedBy(User user) {
         this.ownedBy = user;
     }
+    
+    
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
-    @Override
+    public String getRepository() {
+		return repository;
+	}
+
+	public void setRepository(String repository) {
+		this.repository = repository;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
