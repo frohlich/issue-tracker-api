@@ -16,4 +16,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("select project from Project project where project.ownedBy.login = ?#{principal.username}")
     List<Project> findByOwnedByIsCurrentUser();
 
+    @Query("SELECT COUNT(u) FROM #{#entityName} u")
+    Long countRegisters();
+    
 }

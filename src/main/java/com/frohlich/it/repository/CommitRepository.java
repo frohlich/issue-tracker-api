@@ -20,5 +20,8 @@ public interface CommitRepository extends JpaRepository<Commit, Long> {
     
     @Query("select u from #{#entityName} u where u.issue.id = ?1")
     List<Commit> findByIssueId(Long issueId);
+    
+    @Query("SELECT COUNT(u) FROM #{#entityName} u")
+    Long countRegisters();
 
 }

@@ -32,6 +32,8 @@ import com.frohlich.it.service.dto.IssueHistoryDTO;
 import com.frohlich.it.service.mapper.IssueMapper;
 import com.frohlich.it.web.rest.errors.BadRequestAlertException;
 
+import aj.org.objectweb.asm.Type;
+
 /**
  * Service Implementation for managing Issue.
  */
@@ -83,6 +85,11 @@ public class IssueServiceImpl implements IssueService {
         if (issueDTO.getId() == null) {
         	final Optional<User> user = userService.getUserWithAuthorities();
             issue.setStatus(Flow.BACKLOG);
+            
+            if(issueDTO.getType().equals(IssueType.BUG)
+            		&& issueDTO.getIssueId() != null) {
+            	issue.setStatus(Flow.CODING);
+            }
             
             if (user.isPresent()) {
                 issue.setAssignedTo(user.get());

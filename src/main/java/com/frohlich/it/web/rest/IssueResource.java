@@ -28,7 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.codahale.metrics.annotation.Timed;
+import com.frohlich.it.domain.Attachment;
+import com.frohlich.it.domain.Issue;
 import com.frohlich.it.domain.enumeration.Flow;
+import com.frohlich.it.repository.IssueRepository;
 import com.frohlich.it.service.AttachmentService;
 import com.frohlich.it.service.IssueService;
 import com.frohlich.it.service.dto.AttachmentDTO;
@@ -36,6 +39,7 @@ import com.frohlich.it.service.dto.CommentDTO;
 import com.frohlich.it.service.dto.IssueDTO;
 import com.frohlich.it.service.dto.IssueHistoryDTO;
 import com.frohlich.it.service.impl.FileStorageService;
+import com.frohlich.it.service.mapper.IssueMapper;
 import com.frohlich.it.web.rest.errors.BadRequestAlertException;
 import com.frohlich.it.web.rest.util.HeaderUtil;
 import com.frohlich.it.web.rest.util.PaginationUtil;
@@ -57,10 +61,16 @@ public class IssueResource {
     private FileStorageService fileStorageService;
     private AttachmentService attachmentService;
 
-    public IssueResource(IssueService issueService, FileStorageService fileStorageService, AttachmentService attachmentService) {
+    private IssueRepository issueRepository;
+    private IssueMapper issueMapper;
+    
+    
+    public IssueResource(IssueService issueService, FileStorageService fileStorageService, AttachmentService attachmentService, IssueRepository issueRepository, IssueMapper issueMapper) {
         this.issueService = issueService;
         this.fileStorageService = fileStorageService;
         this.attachmentService = attachmentService;
+        this.issueRepository = issueRepository;
+        this.issueMapper = issueMapper;
     }
 
     /**
@@ -276,6 +286,19 @@ public class IssueResource {
         }
 
         this.issueService.changeOwner(idIssue, idUser);
+    }
+    
+    @GetMapping("/issues/byprojectid/{projectId}")
+    @Timed
+    public ResponseEntity<List<IssueDTO>> byprojectid (@PathVariable Long projectId) {
+    	List<Issue> all = this.issueRepository.findByProjectId(projectId);
+    	List<IssueDTO> result = new ArrayList<IssueDTO>();
+    	
+    	for(Issue item : all) {
+    		result.add(this.issueMapper.toDto(item));
+    	}
+        
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.frohlich.it.repository;
 
+import com.frohlich.it.domain.Attachment;
 import com.frohlich.it.domain.Issue;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
@@ -22,5 +23,11 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     @Query("select issue from Issue issue where issue.reportedBy.login = ?#{principal.username}")
     List<Issue> findByReportedByIsCurrentUser();
+    
+    @Query("select u from #{#entityName} u where u.project.id = ?1")
+    List<Issue> findByProjectId(Long projectId);
+    
+    @Query("SELECT COUNT(u) FROM #{#entityName} u")
+    Long countRegisters();
 
 }
